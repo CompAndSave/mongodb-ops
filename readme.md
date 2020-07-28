@@ -5,6 +5,7 @@
 
 ```
 const MongoDBOps = require('mongodb-ops');
+const connString = "mongodb+srv://YOUR_DB_USERNAME:YOUR_DB_PASSWORD@YOUR_MONGO_ATLAS_URL/YOUR_DBNAME?retryWrites=true&w=majority";
 
 class MongoDB extends MongoDBOps {
   constructor(collectionName) {
