@@ -1,5 +1,5 @@
 # Read and write ops for MongoDB
-**db Client is at static level - It will keep alive and can be reused**
+**DB client is at static level - It will keep alive and can be reused**
 
 **Sample code to use the class**
 
