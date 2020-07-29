@@ -1,0 +1,29 @@
+{
+  "name": "mongodb-ops",
+  "version": "0.0.5",
+  "description": "Read and write ops for MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "mongodb": "^3.5.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lubu12/mongodb-ops.git"
+  },
+  "keywords": [
+    "mongodb"
+  ],
+  "author": "Andrew Y",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lubu12/mongodb-ops/issues"
+  },
+  "homepage": "https://github.com/lubu12/mongodb-ops#readme",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {}
+}
