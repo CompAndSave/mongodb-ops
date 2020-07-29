@@ -43,6 +43,15 @@ class MongoDB extends MongoDBOps {
 
   static async updateOne(collectionName, doc, filter) { return Promise.resolve(await MongoDBOps.writeData("updateOne", collectionName, doc, filter, connString)); }
   async updateOne(doc, filter) { return Promise.resolve(await super.writeData("updateOne", this.collectionName, doc, filter)); }
+  static async updateBulkOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("updateBulk", collectionName, docs, true, connString)); }
+  async updateBulkOrdered(docs) { return Promise.resolve(await super.writeBulkData("updateBulk", this.collectionName, docs, true)); }
+  static async updateBulkUnOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("updateBulk", collectionName, docs, false, connString)); }
+  async updateBulkUnOrdered(docs) { return Promise.resolve(await super.writeBulkData("updateBulk", this.collectionName, docs, false)); }
+
+  static async allBulkOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("allBulk", collectionName, docs, true, connString)); }
+  async allBulkOrdered(docs) { return Promise.resolve(await super.writeBulkData("allBulk", this.collectionName, docs, true)); }
+  static async allBulkUnOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("allBulk", collectionName, docs, false, connString)); }
+  async allBulkUnOrdered(docs) { return Promise.resolve(await super.writeBulkData("allBulk", this.collectionName, docs, false)); }
 }
 
 module.exports = MongoDB;
