@@ -1,9 +1,9 @@
 # Read and write ops for MongoDB
 **DB client is at static level - It will keep alive and can be reused**
 
-**Updated - MongoDB class is added**
+**Updated - MongoDBToolSet class is added**
 ```
-const { MongoDB } = require('mongodb-ops');
+const { MongoDBToolSet } = require('mongodb-ops');
 ```
 
 **Sample code to use the class**
@@ -12,7 +12,7 @@ const { MongoDB } = require('mongodb-ops');
 const { MongoDBOps } = require('mongodb-ops');
 const connString = "mongodb+srv://YOUR_DB_USERNAME:YOUR_DB_PASSWORD@YOUR_MONGO_ATLAS_URL/YOUR_DBNAME?retryWrites=true&w=majority";
 
-class MongoDB extends MongoDBOps {
+class MongoDBToolSet extends MongoDBOps {
   constructor(collectionName) {
     super(connString);
     this.collectionName = collectionName;
@@ -23,14 +23,14 @@ class MongoDB extends MongoDBOps {
     return Promise.resolve(await MongoDBOps.getData(collectionName, queryFilter, false, projection, undefined, undefined, undefined, connString));
   }
 
-  async getDataByID(id, projection) { return Promise.resolve(await MongoDB.getDataByID(this.collectionName, id, projection)); }
+  async getDataByID(id, projection) { return Promise.resolve(await MongoDBToolSet.getDataByID(this.collectionName, id, projection)); }
 
   static async getAllData(collectionName, projection, sort, pagination) {
     let queryFilter = {};
     return Promise.resolve(await MongoDBOps.getData(collectionName, queryFilter, false, projection, sort, pagination, false, connString));
   }
 
-  async getAllData(site, projection, sort, pagination) { return Promise.resolve(await MongoDB.getAllData(this.collectionName, projection, sort, pagination)); }
+  async getAllData(site, projection, sort, pagination) { return Promise.resolve(await MongoDBToolSet.getAllData(this.collectionName, projection, sort, pagination)); }
 
   static async insertOne(collectionName, doc) { return Promise.resolve(await MongoDBOps.writeData("insertOne", collectionName, doc, undefined, connString)); }
   async insertOne(doc) { return Promise.resolve(await super.writeData("insertOne", this.collectionName, doc)); }
