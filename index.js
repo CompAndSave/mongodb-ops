@@ -1,6 +1,6 @@
 'use strict';
 
 const MongoDBOps = require('./lib/mongodb-ops.js');
-const MongoDB = require('./lib/mongodb.js');
+const MongoDBToolSet = require('./lib/mongodb-tool-set.js');
 
-module.exports = { MongoDBOps, MongoDB };
+module.exports = { MongoDBOps, MongoDBToolSet };
