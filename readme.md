@@ -1,10 +1,15 @@
 # Read and write ops for MongoDB
 **DB client is at static level - It will keep alive and can be reused**
 
+**Updated - MongoDB class is added**
+```
+const { MongoDB } = require('mongodb-ops');
+```
+
 **Sample code to use the class**
 
 ```
-const MongoDBOps = require('mongodb-ops');
+const { MongoDBOps } = require('mongodb-ops');
 const connString = "mongodb+srv://YOUR_DB_USERNAME:YOUR_DB_PASSWORD@YOUR_MONGO_ATLAS_URL/YOUR_DBNAME?retryWrites=true&w=majority";
 
 class MongoDB extends MongoDBOps {
