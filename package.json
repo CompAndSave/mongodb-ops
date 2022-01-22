@@ -1,6 +1,6 @@
 {
   "name": "mongodb-ops",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Read and write ops for MongoDB",
   "main": "index.js",
   "scripts": {
