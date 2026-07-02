@@ -1,10 +1,11 @@
 {
   "name": "mongodb-ops",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Read and write ops for MongoDB",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "lint": "node --check index.js && node --check lib/mongodb-ops.js && node --check test/mongodb-ops.test.js"
   },
   "dependencies": {
     "mongodb": "^6.8.0"
