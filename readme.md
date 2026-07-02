@@ -1,65 +1,130 @@
-# Read and write ops for MongoDB
-**DB client is at static level - It will keep alive and can be reused**
+# mongodb-ops
 
-**Updated - MongoDBToolSet class is added**
+Lightweight read/write helpers for MongoDB with a **shared, self-managing client**. The MongoDB client is cached at the class (process) level per connection string and reused across calls — you connect once and let the driver handle pooling, topology monitoring, and failover recovery.
+
+> `writeConcern` is not configurable through this library.
+
+## Install
+
+```bash
+npm install mongodb-ops
 ```
+
+Requires Node.js 16+ and bundles the official `mongodb` driver (v6).
+
+## Exports
+
+```js
+const { MongoDBOps, MongoDBToolSet } = require('mongodb-ops');
+```
+
+- **`MongoDBOps`** — low-level static/instance operations (`getData`, `search`, `writeData`, `writeBulkData`, `getCollectionCount`, `getDbClient`, `closeDBConn`, `getObjectId`).
+- **`MongoDBToolSet`** — a higher-level, collection-scoped convenience class that extends `MongoDBOps` (get / insert / update / replace / delete + bulk variants).
+
+## Quick start
+
+### Collection-scoped (`MongoDBToolSet`)
+
+```js
 const { MongoDBToolSet } = require('mongodb-ops');
+
+const connString = "mongodb+srv://USER:PASS@your-cluster.mongodb.net/your-db?retryWrites=true&w=majority";
+
+// Instance style — bind a collection + connection once
+const orders = new MongoDBToolSet('orders', connString);
+
+await orders.insertOne({ number: 'PO-1001', status: 'open' });
+const open = await orders.getDataByFilter({ status: 'open' }, { number: 1 }, { number: -1 });
+await orders.updateOne({ $set: { status: 'closed' } }, { number: 'PO-1001' });
 ```
 
-**Sample code to use the class**
+Every method also has a **static** form that takes the collection name and connection string explicitly — handy when wrapping it in your own model class:
 
-```
-const { MongoDBOps } = require('mongodb-ops');
-const connString = "mongodb+srv://YOUR_DB_USERNAME:YOUR_DB_PASSWORD@YOUR_MONGO_ATLAS_URL/YOUR_DBNAME?retryWrites=true&w=majority";
+```js
+class Order extends MongoDBToolSet {
+  static collectionName = 'orders';
+  static connString = connString;
 
-class MongoDBToolSet extends MongoDBOps {
-  constructor(collectionName) {
-    super(connString);
-    this.collectionName = collectionName;
+  static getById(id) {
+    return MongoDBToolSet.getDataByID(this.collectionName, id, undefined, this.connString);
   }
-
-  static async getDataByID(collectionName, id, projection) {
-    let queryFilter = { _id:id };
-    return Promise.resolve(await MongoDBOps.getData(collectionName, queryFilter, false, projection, undefined, undefined, undefined, connString));
-  }
-
-  async getDataByID(id, projection) { return Promise.resolve(await MongoDBToolSet.getDataByID(this.collectionName, id, projection)); }
-
-  static async getAllData(collectionName, projection, sort, pagination) {
-    let queryFilter = {};
-    return Promise.resolve(await MongoDBOps.getData(collectionName, queryFilter, false, projection, sort, pagination, false, connString));
-  }
-
-  async getAllData(site, projection, sort, pagination) { return Promise.resolve(await MongoDBToolSet.getAllData(this.collectionName, projection, sort, pagination)); }
-
-  static async insertOne(collectionName, doc) { return Promise.resolve(await MongoDBOps.writeData("insertOne", collectionName, doc, undefined, connString)); }
-  async insertOne(doc) { return Promise.resolve(await super.writeData("insertOne", this.collectionName, doc)); }
-  static async insertBulkOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("insertBulk", collectionName, docs, true, connString)); }
-  async insertBulkOrdered(docs) { return Promise.resolve(await super.writeBulkData("insertBulk", this.collectionName, docs, true)); }
-  static async insertBulkUnOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("insertBulk", collectionName, docs, false, connString)); }
-  async insertBulkUnOrdered(docs) { return Promise.resolve(await super.writeBulkData("insertBulk", this.collectionName, docs, false)); }
-
-  static async replaceOne(collectionName, doc, filter) { return Promise.resolve(await MongoDBOps.writeData("replaceOne", collectionName, doc, filter, connString)); }
-  async replaceOne(doc, filter) { return Promise.resolve(await super.writeData("replaceOne", this.collectionName, doc, filter)); }
-  static async replaceBulkOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("replaceBulk", collectionName, docs, true, connString)); }
-  async replaceBulkOrdered(docs) { return Promise.resolve(await super.writeBulkData("replaceBulk", this.collectionName, docs, true)); }
-  static async replaceBulkUnOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("replaceBulk", collectionName, docs, false, connString)); }
-  async replaceBulkUnOrdered(docs) { return Promise.resolve(await super.writeBulkData("replaceBulk", this.collectionName, docs, false)); }
-
-  static async updateOne(collectionName, doc, filter) { return Promise.resolve(await MongoDBOps.writeData("updateOne", collectionName, doc, filter, connString)); }
-  async updateOne(doc, filter) { return Promise.resolve(await super.writeData("updateOne", this.collectionName, doc, filter)); }
-  static async updateMany(collectionName, doc, filter) { return Promise.resolve(await MongoDBOps.writeData("updateMany", collectionName, doc, filter, connString)); }
-  async updateMany(doc, filter) { return Promise.resolve(await super.writeData("updateMany", this.collectionName, doc, filter)); }
-  static async updateBulkOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("updateBulk", collectionName, docs, true, connString)); }
-  async updateBulkOrdered(docs) { return Promise.resolve(await super.writeBulkData("updateBulk", this.collectionName, docs, true)); }
-  static async updateBulkUnOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("updateBulk", collectionName, docs, false, connString)); }
-  async updateBulkUnOrdered(docs) { return Promise.resolve(await super.writeBulkData("updateBulk", this.collectionName, docs, false)); }
-
-  static async allBulkOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("allBulk", collectionName, docs, true, connString)); }
-  async allBulkOrdered(docs) { return Promise.resolve(await super.writeBulkData("allBulk", this.collectionName, docs, true)); }
-  static async allBulkUnOrdered(collectionName, docs) { return Promise.resolve(await MongoDBOps.writeBulkData("allBulk", collectionName, docs, false, connString)); }
-  async allBulkUnOrdered(docs) { return Promise.resolve(await super.writeBulkData("allBulk", this.collectionName, docs, false)); }
 }
-
-module.exports = MongoDB;
 ```
+
+### Low-level (`MongoDBOps`)
+
+```js
+const { MongoDBOps } = require('mongodb-ops');
+
+const rows = await MongoDBOps.getData(
+  'orders',
+  { status: 'open' },              // query
+  false,                           // isAggregate
+  { number: 1 },                   // projection
+  { number: -1 },                  // sort
+  { startIndex: 1, endIndex: 20 }, // pagination (1-based, inclusive)
+  false,                           // isGetCount
+  connString
+);
+```
+
+## Connection management
+
+`getDbClient(connString)` maintains **one cached `MongoClient` per connection string** for the life of the process (kept in an internal `Map`; concurrent first-connects are de-duplicated). All operations reuse it, so there is no per-call connect overhead — and the driver's topology monitoring transparently rediscovers a new primary after a replica-set failover.
+
+Clients are created with safe, failover-friendly defaults:
+
+```js
+{ serverSelectionTimeoutMS: 8000, retryWrites: true, retryReads: true }
+```
+
+**Override or extend** the driver options process-wide, before the first connection is made — your values are merged over the defaults:
+
+```js
+const { MongoDBOps } = require('mongodb-ops');
+MongoDBOps.clientOptions = { maxPoolSize: 20 };
+```
+
+**Close** every cached connection (e.g. in a CLI or test teardown; long-running servers/Lambdas normally leave them open for reuse):
+
+```js
+await MongoDBOps.closeDBConn();
+```
+
+## API
+
+### `MongoDBToolSet`
+
+Constructor: `new MongoDBToolSet(collectionName, connString)`. Instance methods use the bound collection/connection; each has a matching static method that takes them as arguments.
+
+| Read | Write | Bulk |
+|---|---|---|
+| `getDataByID` | `insertOne` | `insertBulkOrdered` / `insertBulkUnOrdered` |
+| `getDataByFilter` | `replaceOne` | `replaceBulkOrdered` / `replaceBulkUnOrdered` |
+| `getDataByAggregate` | `updateOne` / `updateMany` | `updateBulkOrdered` / `updateBulkUnOrdered` |
+| `getDataCount` | `deleteOne` / `deleteMany` | `deleteBulkOrdered` / `deleteBulkUnOrdered` |
+| `list` (rows + optional total) | | `allBulkOrdered` / `allBulkUnOrdered` |
+| `getAllData` | | |
+
+### `MongoDBOps`
+
+`getData`, `search`, `writeData(type, …)`, `writeBulkData(type, …, ordered)`, `getCollectionCount`, `getObjectId`, `getDbClient`, `closeDBConn`.
+
+## Changelog
+
+### 0.11.1
+- **Hardened connection caching.** The client cache is now keyed by connection string in a `Map` (previously matched against MongoDB driver internals), making client reuse reliable across driver versions.
+- **De-duplicated concurrent cold-start connects** by caching the connect promise; a failed connect is evicted so the next call retries instead of caching a rejected promise.
+- **Safer driver defaults:** `serverSelectionTimeoutMS: 8000`, `retryWrites: true`, `retryReads: true` — reads now recover automatically across a replica-set failover/election.
+- **New `MongoDBOps.clientOptions`** hook to override/extend the driver options process-wide.
+- `closeDBConn()` now drains the client `Map` (and any legacy cache).
+
+### 0.11.0
+- Added estimated collection count (`getCollectionCount`).
+
+### Earlier
+- `search`, collation, and aggregate options. See the git history for details.
+
+## License
+
+ISC
