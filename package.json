@@ -5,10 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "node --test",
-    "lint": "node --check index.js && node --check lib/mongodb-ops.js && node --check test/mongodb-ops.test.js"
+    "lint": "node --check index.js && node --check lib/mongodb-ops.js && node --check test/mongodb-ops.test.js && node --check test/mongodb-write-errors.test.js"
   },
   "dependencies": {
     "mongodb": "^6.8.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0"
   },
   "repository": {
     "type": "git",
