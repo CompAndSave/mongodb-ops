@@ -112,6 +112,13 @@ Constructor: `new MongoDBToolSet(collectionName, connString)`. Instance methods 
 
 ## Changelog
 
+### 0.11.3
+- **Topology diagnostics:** errors carrying a topology (`MongoServerSelectionError.reason`) emit one `[mongodb-ops] <connect|writeData|writeBulkData>` line through `console.error`, listing each host's type, round-trip time and last error. Host addresses and replica-set `setName` are intentionally logged; complete URIs and userinfo are redacted from diagnostic text. Connection strings are never passed to the logger.
+- Diagnostics cannot replace the original rejection, even if formatting or logging throws. Failed connections are evicted before logging so the next call can reconnect.
+
+### 0.11.2
+- **Preserve write errors:** single-write and bulk-write failures now reject the original `Error`, retaining `code`, `codeName`, `errInfo` and bulk `writeErrors`. This replaces the previous string / `BulkWriteResult` rejection shapes; consumers should read the error's `message` rather than assume a string.
+
 ### 0.11.1
 - **Hardened connection caching.** The client cache is now keyed by connection string in a `Map` (previously matched against MongoDB driver internals), making client reuse reliable across driver versions.
 - **De-duplicated concurrent cold-start connects** by caching the connect promise; a failed connect is evicted so the next call retries instead of caching a rejected promise.
